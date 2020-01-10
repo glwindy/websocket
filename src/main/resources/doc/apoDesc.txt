@@ -1,0 +1,32 @@
+AOP 通知类型有：前置通知、后置最终通知、后置返回通知、后置异常通知、环绕通知
+
+1、@Pointcut 是创建切入点
+切入点方法不用写代码，返回类型为void
+execution: 用于匹配表达式
+execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern)throws-pattern?)
+>修饰符匹配（modifier-pattern?）
+>返回值匹配（ret-type-pattern） 可以为*表示任何返回值、全路径的类名等
+>类路径匹配（declaring-type-pattern）
+>方法名匹配（name-pattern）可以指定方法名 或者 * 代表所以， set* 代表以set开头的所有方法
+>参数匹配（param-pattern）可以指定具体的参数类型，多个参数间用“,”隔开，各个参数也可以用“*”来表示匹配任意类型的参数，
+ 如(String)表示匹配一个String参数的方法；(*,String)表示匹配有两个参数的方法，第一个参数可以是任意类型，而第二个参数是
+ String类型；可以用(..)表示零个或多个任意参数
+>异常类型匹配（throws-pattern?）其中后面跟着“?”的是可选项
+例如：
+1）execution(* *(..)) 表示匹配所有方法
+2）execution(public * com.wujie.websocket.controller.*(..)) 表示匹配com.wujie.websocket.controller中所有的public方法
+3）execution(* com.wujie.controller..*.*(..)) 表示匹配com.wujie.controller包及其子包下的所有方法
+
+2、JointPoint
+除 @Around 外，每个方法里都可以加或者不加参数JointPoint。JoinPoint包含了类名、被切面的方法名、参数等属性。@Around 参数
+必须为ProceedingJoinPoint。
+
+3、自定义注解
+对于特定的方法执行时需要经过通知，可以在方法上加注解切面。
+
+
+
+
+
+
+

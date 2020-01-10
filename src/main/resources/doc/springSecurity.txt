@@ -1,0 +1,132 @@
+Spring Security
+认证：Authorization 授权，给通信对方一定的权限
+1、AuthenticationManagerBuilder
+WebSecurityConfigurerAdapter 中重写 protected void configure(AuthenticationManagerBuilder auth)
+实现Inmemory, LDAP, JDBC方式的认证，同时SpringBoot提供了默认的login界面（DefaultLoginPageConfigurer<>()）
+
+2、HttpSecurity
+WebSecurityConfigurerAdapter 中通过重写 protected void configure(HttpSecurity http)
+实现CORS（Cross-Origin Resource Sharing跨站点资源共享），自定义登录/登出界面，是否需要认证等自定义配置功能。
+默认指定：
+http
+    .authorizeRequests().anyRequest().authenticated() // 所有的request都需要认证
+    .and()
+    .formLogin()  // 缺省login界面认证
+    .and()
+    .httpBasic();  // Basic认证
+
+3、CORS
+英文全称：Cross-Origin Resource Sharing
+跨站点资源共享，提供对信赖 web site 的跨域访问权限，允许以灵活的方式指定什么样的跨域请求被授权
+Spring Security5 默认有效CORS，实现安全的外部访问允许
+
+4、CSRF
+跨站请求伪造；
+
+
+WebSecurityConfigurerAdapter类的使用
+WebSecurityConfigurerAdapter类是个适配器，在配置的时候，需要自己写个配置类去继承，然后编写自己需要的特殊配置。
+使用示例：
+          @Bean
+            public WebSecurityConfigurerAdapter webSecurityConfigurer() {
+                return new WebSecurityConfigurerAdapter() {
+                    @Override
+                    protected void configure(HttpSecurity http) throws Exception {
+                        http
+                            .authorizeRequests()
+                            .antMatchers("/resources/**", "/signup", "/about").permitAll()
+                            .antMatchers("/admin/**").hasRole("ADMIN")
+                            .antMatchers("/db/**").access("hasRole('ADMIN') and hasRole('DBA')")
+                            .anyRequest().authenticated()
+                            .and()
+                            .formLogin()
+                            .usernameParameter("username")
+                            .passwordParameter("password")
+                            .failureForwardUrl("/login?error")
+                            .loginPage("/login")
+                            .permitAll()
+                            .and()
+                            .logout()
+                            .logoutUrl("/logout")
+                            .logoutSuccessUrl("/index")
+                            .permitAll()
+                            .and()
+                            .httpBasic()
+                            .disable();
+                    }
+                };
+            }
+说明：每个模块配置使用and结尾。
+      authorizeRequests()配置路径拦截，表明路径访问所对应的权限、角色、认证信息。
+      formLogin()对应表单认证相关的配置
+      logout()对应了注销相关的配置
+      httpBasic()可以配置basic登录
+      HttpSecurity具体的权限控制规则配置。
+
+使用示例：
+        @Override
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth
+                .inMemoryAuthentication()
+                .withUser("admin").password("admin").roles("USER");
+        }
+说明：AuthenticationManagerBuilder用来配置全局的认证相关的信息，其实就是AuthenticationProvider和UserDetailsService，
+      前者是认证服务提供者，后者是认证用户（及其权限）。
+
+HttpSecurity具体的权限控制规则配置。一个这个配置相当于xml配置中的一个标签。
+WebSecurity全局请求忽略规则配置（比如说静态文件、注册页面）、全局HttpFirewall配置、是否debug配置、全局SecurityFilterChain
+配置、privilegeEvaluator、expressionHandler、securityInterceptor。
+
+
+
+WebSecurityConfigurerAdapter和ResourceServerConfigurerAdapter区别
+WebSecurityConfigurerAdapter是默认情况下spring security的http配置；ResourceServerConfigurerAdapter是默认情况下spring
+security oauth2的http配置。它们都是Adapter，都会产生一个filter Chain，两者可以相互配合来对不同的url进行权限控制。
+
+WebSecurityConfigurerAdapter部分源码如下：
+    @Order(100)
+    public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigurer<WebSecurity> {
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+           ...
+        }
+        public void configure(WebSecurity web) throws Exception {
+        }
+        protected void configure(HttpSecurity http) throws Exception {
+            ...
+        }
+        ...
+    }
+
+ResourceServerConfigurerAdapter部分源码如下：
+    public class ResourceServerConfigurerAdapter implements ResourceServerConfigurer {
+
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+        }
+
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http.authorizeRequests().anyRequest().authenticated();
+        }
+
+    }
+
+在ResourceServerProperties中，定义了它的order默认值为SecurityProperties.ACCESS_OVERRIDE_ORDER - 1，是大于100的，即
+WebSecurityConfigurerAdapter的配置拦截要优先于ResourceServerConfigurerAdapter，优先级高的http配置可以覆盖优先级低的
+配置（order值越小优先级越高）。
+某些情况下如果需要ResourceServerConfigurerAdapter的拦截优先于WebSecurityConfigurerAdapter，需要在配置文件中添加：
+security.oauth2.resource.filter-order = 99
+或者重写WebSecurityConfigurerAdapter的order配置，如下：
+    @Configuration
+    @EnableWebSecurity
+    @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
+    public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+        ...
+    }
+
+注意：antMatcher()是httpSecurity的一个方法，它只告诉了spring我只配置了一个Adapter能处理哪个url，与authorizeRequests()
+      没有关系。使用authorizeRequests().antMatchers()是告诉你在antMatchers()中指定的一个或多个路径，比如执行permitAll()
+      或hasRole()。它们在第一个http.antMatcher()匹配时就会生效。
+      所以，WebSecurityConfigurerAdapter与ResourceServerConfigurerAdapter同时使用，其实和spring security的多个
+      HttpSecurity配置是一样的，原理也差不多是一样的。
+

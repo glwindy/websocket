@@ -1,0 +1,14 @@
+/target/
+/.idea/
+
+[Tt]humbs.db
+*.DS_Store
+
+.classpath
+.project
+.settings/
+*.gz
+*.log
+/.metadata/
+.idea/*
+*.iml

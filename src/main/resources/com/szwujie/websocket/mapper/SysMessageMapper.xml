@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szwujie.websocket.mapper.SysMessageMapper">
+    <select id="getMessageByInitiator" resultType="com.szwujie.websocket.entity.SysMessage">
+        select * from sys_message
+        where 1=1
+        and initiator = #{userId}
+        and status = 0
+        and is_read = 0
+        order by created_date desc
+        limit 1
+    </select>
+    <select id="getMessages" resultType="com.szwujie.websocket.entity.SysMessage">
+        select * from sys_message
+        where 1=1
+        and receiver = #{userId}
+        and status = 0
+        and is_read = 0
+        order by created_date desc
+    </select>
+    <update id="changeById" parameterType="java.lang.String">
+        update sys_message set status = 1,is_read = 1
+        where id = #{id}
+    </update>
+    <select id="getMessageByReceiver" resultType="com.szwujie.websocket.entity.SysMessage">
+        select * from sys_message
+        where 1=1
+        and receiver = #{userId}
+        and status = 0
+        and is_read = 0
+        order by created_date desc
+        limit 1
+    </select>
+</mapper>

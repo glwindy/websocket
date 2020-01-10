@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Spring Boot+WebSocket+广播式</title>
+
+</head>
+<body onload="disconnect()">
+<noscript><h2 style="color: #ff0000">貌似你的浏览器不支持websocket</h2></noscript>
+<div>
+    <div>
+        <button id="connect" onclick="connect();">连接</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">断开连接</button>
+    </div>
+    <div id="conversationDiv">
+        <label>输入你的名字</label><input type="text" id="name" />
+        <button id="sendName" onclick="sendName();">发送</button>
+        <p id="response"></p>  <!--显示返回的数据-欢迎用户-->
+        <p id="response1"></p> <!--显示接收的消息-->
+    </div>
+</div>
+<!--<script th:src="@{js/sockjs.min.js}"></script>-->
+<script th:src="@{js/sockjs.js}"></script>
+<script th:src="@{js/stomp.min.js}"></script>
+<script th:src="@{js/jquery-1.11.0.min.js}"></script>
+<!--<script th:src="@{jquery.js}"></script>-->
+<!--<script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>-->
+<script th:inline="javascript">
+    var stompClient = null;
+    //此值有服务端传递给前端,实现方式没有要求
+    //var userId = [["efd2434e-0281-4cd5-a381-80d18bf86256"]];
+
+    function setConnected(connected) {
+        document.getElementById('connect').disabled = connected;
+        document.getElementById('disconnect').disabled = !connected;
+        document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
+        $('#response').html();
+    }
+
+    function connect() {
+        //var socket = new SockJS('/endpointWisely'); //1、连接SockJS的endpoint是“endpointWisely”，与后台代码中注册的endpoint要一样。
+        //var socket = new SockJS('http://127.0.0.1:7000/cc-api/endpointWisely', null, {transports: ['websocket']});
+        //var socket = new SockJS('http://127.0.0.1:7000/cc-api/endpointWisely','v11.stomp');
+        var userId = "cf06dfd9-98ea-4291-9857-8c6f6aff506a";
+        var token =
+        "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjpudWxsLCJjdHkiOiJKV1QifQ..yNoTsohYfzKfGO9DWKj9FA.wyd5Jq9rMi1Vf8TSNFY2qVqeJJlYQFHuPW7p8xxaqQzlR6jL5-ArIofU_b-KDN79nklcx73_8Cw1l1c7VmfRS4l2Uu5kdOFqgHitCl9mvvgOAh2dnkOPRBRPaGDsIMLTMWKgamBDl991p0hEpl44Zlyh_58g9v1Eehw2aKAcSbaHwZM1j8MfAxTQqoVD06yw0j5cOslbpOqmyJYL8zIY1YetBaFGujzl1HlXqsrvFCTQQ3OJCdnH9NpgRt8oykf6ZEgNM0aztvvAg2Xii7Y9SS_U17Dy_PBJmYU1Rf6mIoNAf9lYolPuywmBi6dGBfl9vyfL-f6T1vbX4y2iVlYTt4X2IQhYp70DF4EUxRxSXpYl0MEZ9SkhizpNvUBfmb3b0dGHiTvxbZCj1d1R3SdiGSBG47bJ3pJVzJkXNB2zDXwztMnQhdQMp3yOnUS21M_oMMJqCepHiYWw4r7U5cm2zy_Y-tGMlrtphmXYKKcKHM3ORfW5YbjPxgIb68rngSFw5SkQ5QCmv8-2QIJuwYZmpsqqMJpZorJm5E8Zri-bMSqFgsCZCK7i3c7EkOEZVFhXdsdHkmDR8Zc54lQgMQ6b4A.FnuHH1C19Np8G_KfrOHpkg";
+        var headers = {
+            'x-auth-token': token
+        };
+        var socket = new SockJS('http://127.0.0.1:4107/oa-api/endpointWisely');
+        stompClient = Stomp.over(socket); //2、创建STOMP协议的webSocket客户端。
+        stompClient.connect(headers, function(frame) { //3、连接webSocket的服务端。
+            setConnected(true);
+            console.log('开始进行连接Connected: ' + frame);
+            //4、通过stompClient.subscribe（）订阅服务器的目标是'/topic/getResponse'发送过来的地址，与@SendTo中的地址对应。
+            //stompClient.subscribe('/topic/getResponse', function(response){
+            //    showResponse(JSON.parse(response.body).responseMessage);
+            //});
+            // 4、通过stompClient.subscribe（）订阅服务器的目标是'/user/' + userId + '/msg'接收一对一的推送消息,
+            // 其中userId由服务端传递过来,用于表示唯一的用户,通过此值将消息精确推送给一个用户
+            stompClient.subscribe('/user/' + userId + '/msg', function(response){
+                alert(response.body);
+                console.log(response);
+                //if(response != null) {
+                    //标记状态为已发送、已读
+                    //var id = JSON.parse(JSON.parse(response.body).responseMessage).id;
+                    //$.ajax({
+                    //    type: "GET",
+                    //    url: "changeById",
+                    //    data: {'id':id, 'userId':"d892bf12bf7d11e793b69c5c8e6f60fb"},
+                    //    dataType: "json",
+                    //    success: function(data){
+                    //        alert(data.data);
+                    //    }
+                    //});
+               // }
+                showResponse1(JSON.parse(response.body).responseMessage);
+                response.ack();
+            });
+            stompClient.debug(function (response) {
+                console.log(response);
+            });
+        });
+    }
+
+    function disconnect() {
+        if (stompClient != null) {
+            stompClient.disconnect();
+        }
+        setConnected(false);
+        console.log("Disconnected");
+    }
+
+    function sendName() {
+        var name = $('#name').val();
+        //通过stompClient.send（）向地址为"/welcome"的服务器地址发起请求，与@MessageMapping里的地址对应。
+        //因为我们配置了registry.setApplicationDestinationPrefixes(Constant.WEBSOCKETPATHPERFIX);所以需要增加前缀/ws-push/
+        stompClient.send("/ws-push/welcome", {}, JSON.stringify({ 'name': name, 'userId': 'cf06dfd9-98ea-4291-9857-8c6f6aff506a' }));
+    }
+
+    function showResponse(message) {
+        var response = $("#response");
+        response.html(message);
+    }
+    function showResponse1(message) {
+        var response = $("#response1");
+        response.html(message);
+    }
+</script>
+</body>
+</html>

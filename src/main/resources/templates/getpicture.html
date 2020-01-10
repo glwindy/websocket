@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>测试图片访问</title>
+</head>
+<body>
+<div style="height:15px;">
+    <span style="float:left;margin-right:40px;">申请人：张三</span>
+    <span style="float:left;margin-right:40px;">部门：IT综合服务部</span>
+    <span style="float:left;margin-right:40px;">主管部门：平台管理中心</span>
+    <span style="float:left;margin-right:40px;">财务：高经理</span>
+    <span style="float:left;margin-right:40px;">董事长：COCO</span>
+    <span style="float:left;margin-right:40px;">主管部门：平台管理中心</span>
+    <span style="float:left;margin-right:40px;">财务：高经理</span>
+    <span style="float:left;margin-right:40px;">董事长：COCO</span>
+    <span style="float:left;margin-right:40px;">财务：高经理</span>
+    <span style="float:left;margin-right:40px;">董事长：COCO</span>
+    <span style="float:left;margin-right:40px;">主管部门：平台管理中心</span>
+    <span style="float:left;margin-right:40px;">财务：高经理</span>
+    <span style="float:left;margin-right:40px;">董事长：COCO</span>
+</div>
+<br/>
+<button value="测试按钮" onclick="clickTest()">测试</button>
+<!--<div id="imageShow" style="display:hidden">-->
+<img src="http://127.0.0.1:8700/oa-api/staticFile/borrow_archive_application/3a68550e-f0f4-4997-bc69-f4e575e41545/a5d38775-9052-4023-9363-183da104535e.png" />
+<!--</div>-->
+</body>
+
+<script src="js/jquery-1.11.0.min.js" type="text/javascript" charset="utf-8"></script>
+<script  type="text/javascript">
+    var hasClick = false;
+    function clickTest() {
+        if (hasClick) {
+            $("#imageShow").hide();
+        }else {
+            hasClick = true;
+            $("#imageShow").show();
+            //setTimeout(function () { hasClick=false},3000);//加个计时器，如果3s后没有再次点击按钮则恢复再点点击确认
+        }
+    }
+
+</script>
+
+</html>

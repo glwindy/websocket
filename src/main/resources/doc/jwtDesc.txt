@@ -1,0 +1,85 @@
+JSON Web Token(jwt) 是目前最流行的跨域身份验证解决方案。
+JWT原则：
+    JWT的原则是在服务器身份验证之后，将生成一个JSON对象并将其发送回用户，例如：
+    {
+        "UserName": "TestUserName",
+        "Role": "Admin",
+        "Expire": "2018-08-08 20:15:56"
+    }
+    之后，当用户与服务器通信时，客户在请求中发回JSON对象。服务器仅依赖于这个JSON对象来标识用户。为了防止用户篡改数据，服务器将在生成对象时添加签名。
+    服务器不会保存任何会话数据，即服务器变为无状态，使其更容易拓展。
+
+
+JWT的数据结构：
+    JWT对象为一个很长的字符串，字符之间通过“.”分隔符分为三个子串：JWT头、有效载荷、签名。
+    注意：JWT对象为一个长字串，各字符串之间也没有换行符。
+    示例：
+    eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjpudWxsLCJjdHkiOiJKV1QifQ..WX6Nm0suE3FWVa-RpYP2Nw.NqlpAxLud-Pn1fdj_aBRs0xAQOQc90FHs0osGfoaeE_EPzwds0OaSFJVsohILYMkFukiTdCWrpJgMS4Fvb2vNtDn4OiVYTy4fVWFLkFaQdcRp0ML5ZpcKb9S4K6FJ_ImcTxvwMlVZ2GuhculVDgYp8zSCWsaDpIrk5gKTkWjokQvAwckKOAOaesqeno9hJykyn7tT3NPHhOe5fNE_54jngtcqDd0Exn9_Vk1cOls_ZJxH9_94IZsIeCTtwO_WyzljywV1PYK9VK5z3r2-ZKLAsblHbjVrplfBbzx8DBLn1ybosYkJVfkcw-ksBFjX1wbKuBddP2kWEUK-Mv_kkSb5KbDIUcSgrfSa7uureZyAETtg-f3qyjqUByWSMCLV3ynO1csrjjOeZCaJKo6ozq8C4GoTNjJh_pkTowBV5OEfP9xOgmybP7ul9yJWx4q1niJl0Uqk703QNckW8zV_DAwa_v-2ex5MCk2wcCpuRM8G9rKtRbFpt1OrYlhn-VgCfGHZ68Xhfm5-ObvHm6zVvm-cU45wRfyEaYHT-tBKOh1Un6d1VsY8TGKMrnAdkwuW5KwngHz3l2cHKWUgAADEwsWmg.LMzs3j5ZardVBOKdUoaWKw
+1、JWT头
+JWT头部分是一个描述JWT元数据的JSON对象，通常如下所示：
+    {
+        "alg": "HS256",
+        "typ": "JWT"
+    }
+alg属性表示签名使用的算法，默认为HMAC SHA256(写为HS256)；type属性表示令牌的类型，JWT令牌统一写为JWT。
+最后，使用Base64 URL算法将上述JSON对象转换为字符串保存。
+
+2、有效载荷（Payload）
+有效载荷部分，是JWT的主体内容部分，也是一个JSON对象，包含需要传递的数据。JWT指定七个默认字段供选择。
+iss：发行人
+exp：到期时间
+sub：主题
+aud：用户
+nbf：在此之前不可用
+iat：发布时间
+jti：JWT ID用于标识该JWT
+除以上默认字段外，还可以自定义私有字段，例如：
+    {
+        "sub": "1234567890",
+        "name": "testUser",
+        "admin": true
+    }
+注意：默认情况下JWT是未加密的，任何人都可以解读其内容，因此不要构建隐私信息字段，存放保密信息，以防止信息泄露。
+      JSON对象也使用Base64 URL算法转换为字符串保存。
+
+3、签名哈希
+签名哈希部分是对上面两部分数据签名，通过指定的算法生成哈希，以确保数据不会被篡改。
+首先，需要指定一个密码（secret）。该密码仅仅为保存在服务器中，并且不能向用户公开。然后，使用标头中指定的签名算法（默认
+情况下为HMAC SHA256）根据以下公式生成签名。
+HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secret)
+在计算出签名哈希后，JWT头、有效载荷和签名哈希的三个部分组合成一个字符串，每个部分用“.”分隔，就构成整个JWT对象。
+
+4、Base64URL算法
+该算法和常见的Base64算法类似，稍有区别。
+作为令牌的JWT可以放在URL中。Base64中用的三个字符是“+”、“/”和“=”，由于在URL中有特殊含义，因此Base64URL中对它们做了
+替换：“=”去掉，“+”用“-”替换，“/”用“_”替换，这就是Base64URL算法。
+
+
+JWT的用法：
+客户端接收服务器返回的JWT，将其存储在Cookie或localStorage中。
+此后，客户端将在与服务器交互中都会带JWT。如果将它存储在Cookie中，就可以自动发送，但是不会跨域，因此一般是将它放入HTTP请
+求的Header Authorization字段中。
+Authorization: Bearer
+当跨域时，也可以将JWT放置于POST请求的数据主体中。
+如果在Authorization header中发送令牌，则跨域资源共享（CORS）将不会成为问题，因为它不使用cookie。
+
+
+JWT问题和趋势：
+1、JWT默认不加密，但可以加密。生成原始令牌后，可以使用该令牌再次对其进行加密。
+2、当JWT未加密方法时，一些私密数据无法通过JWT传输。
+3、JWT不仅可用于认证，还可用于信息交换。善用JWT有助于减少服务器请求数据库的次数。
+4、JWT的最大缺点是服务器不保存会话状态，所以在使用期间不可能取消令牌或更改令牌的权限。也就是说，一旦JWT签发，在有效期内
+   将会一直有效。
+5、JWT本身包含认证信息，因此一旦信息泄露，任何人都可以获得令牌的所有权限。为了减少盗用，JWT的有效期不宜设置太长。对于某
+   些重要操作，用户在使用时应该每次都进行身份验证。
+6、为了减少盗用和窃取，JWT不建议使用HTTP协议来传输代码，而是使用加密的HTTPS协议进行传输。
+
+
+JWT使用场景：
+授权：这是最常见的使用场景，解决单点登录问题。因为JWT使用起来轻便，开销小，服务端不用记录用户状态信息（无状态），所以使
+      用比较广泛。
+信息交换：JWT是在各个服务之间安全传输信息的好方法。因为JWT可以签名，例如，使用公钥/私钥对儿 - 可以确定请求方是合法的。此
+      外，由于使用标头和有效负载计算签名，还可以验证内容是否未被篡改。
+
+
+

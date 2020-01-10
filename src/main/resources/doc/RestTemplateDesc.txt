@@ -1,0 +1,33 @@
+RestTemplate是spring的一个rest客户端，在spring-web这个包下，点击进去可以看到spring-web：5.0.8.RELEASE。
+底层实现方式：在没有第三方依赖的情况下默认为HttpURLConnection（URLConnection）。
+可以 通过setRequestFactory属性切换到不同的HTTP源。常用的Rest client有以下三种：
+1、SimpleClientHttpRequestFactory（封装URLConnection）
+2、HttpComponentsClientHttpRequestFactory（封装HttpClient）
+3、OkHttp3ClientHttpRequestFactory（封装OKHttp）
+注意：Netty4ClientHttpRequestFactory在spring boot 2.0之后就不推荐使用了，性能上明显不如其他几个。
+切换使用方式：在对应的pom中添加依赖（具体查看RestConfig）
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.11.0</version>
+        </dependency>
+    </dependencies>
+
+默认情况下，RestTemplate自动帮我们注册了一组HttpMessageConverter用来处理一些不同的contentType请求。
+如StringHttpMessageConverter来处理text/plain；MappingJackson2HttpMessageConverter来处理application/json；
+MappingJackson2XmlHttpMessageConverter来处理application/xml。
+使用GsonHttpMessageConverter替换掉默认用来处理application/json的MappingJackson2HttpMessageConverter示例：
+    RestTemplate restTemplate = new RestTemplate();
+    // 获取RestTemplate默认配置好的所有转换器
+    List<HttpMessageConverter<?>> messageConverters = restTemplate.getMessageConverters();
+    // 默认的MappingJackson2HttpMessageConverter在第七个，先把它移除掉
+    messageConverters.remove(6);
+    // 添加上GSON的转换器
+    messageConverters.add(6, new GsonHttpMessageConverter());
+

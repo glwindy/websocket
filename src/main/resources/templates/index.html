@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <title>消息通知</title>
+    </head>
+
+    <body>
+        <div>
+            <input type="button" id="btnTest" value="数据库测试" />
+        </div>
+    </body>
+
+    <script src="js/jquery-1.11.0.min.js" type="text/javascript" charset="utf-8"></script>
+    <script  type="text/javascript">
+        var allData = {
+                      "password": "123456",
+                      "type": "web",
+                      "username": "test1"
+                    };
+        $("#btnTest").click(function() {
+            //$.ajax({
+           //      type: "POST",
+            //     url: "http://127.0.0.1:8700/sso/login",
+            //     contentType:'application/json;charset=utf-8',
+            //     data:JSON.stringify(allData),
+             //    cache:false,
+             //    dataType: "json",
+            //     success: function(data){
+             //       alert(data);
+             //    }
+            //});
+
+        var id = { "id":"cf06dfd9-98ea-4291-9857-8c6f6aff506a"};
+        var token = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjpudWxsLCJjdHkiOiJKV1QifQ..C65y9q5OvOTu9iy21YxYgQ.6mNEyDBtqyLAqvRCIusFi7mMFBdaAwb-IBZPnioAT3l5OSsQ-wyFdN4OvjJ2WPhZFFAlGtuxcvitDQkfBE1ZqqYOB7A6s-3HVNzI1qIRvvS91bcFZuZv1SlBHoAH_qgTPaPTfoazzraKUtOrY0V1mE4CG75aApCY0KB0kZ2us2-oQ2tESeAaRfIEz9M1KmhpmE7Ysq1eTvR268MNkAX5lB25RkJdUSPPbiiBMzG7q9FDn5tw1RGhG5z3GDBcE3heecgWc7iM6jqunmInRfxM9P8Hk5dc4pgpIzUDkMKLs81VvUIy6gecE3JBpd-T2h6wCRd1VhXIeiDaFLVO0kdXKVI1F5uIN4H0GVep268FIWfnWKx2FrEER0mdr26YFxGw913KMqhNNuL9ibb9ESD_esySFSyE3_QU_pz__S4Gqa1s5UJfzqQnTfWvHKoMaRADdkE-oZlMn6J_bWPcmpeWnIvEyACT4q9mU3KbvbHLRcUBYWp0ZxrWeN5TbzmizPWAm84jKb3n4VKs2t3-UvVovq9nNCjG7lynu8x62-lApxZp4pIVcGBlEv_C_QsM6fMzWYXOWcXQk8Eof_mEsqcnOQG171GQ-a92j-fnWVT2GF4.2JbZSi1HjMy-Iw1ZJfwgzg";
+        fetch('http://127.0.0.1:4207/crm-api/sysMessage/updateIsReadById/4863ee33-9dc7-4305-98fe-0e2262a2dcaf', {
+            body: JSON.stringify(id),
+           // cache: 'no-cache',
+           // credentials: 'same-origin', //发送同源 cookie
+            headers: new Headers({
+                'x-auth-token': token,
+                'content-type': 'application/json'
+            }),
+            method: 'PUT', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors',  //跨域
+            //redirect: 'follow',  //跟随重定向的地址 ，继续请求
+            //referrer: 'no-referrer',
+        })
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(myJson) {
+            console.log(myJson);
+          });
+
+
+        });
+    </script>
+</html>

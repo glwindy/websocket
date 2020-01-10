@@ -1,0 +1,29 @@
+server:
+  port: 8500
+
+spring:
+  application:
+    name: websocket
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+  datasource:
+      url: jdbc:mysql://localhost:3306/crm?useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE
+      driverClassName: com.mysql.jdbc.Driver
+      username: root
+      password: windy
+      validation-query: SELECT 1
+  activiti:
+    checkProcessDefinitions: false
+    databaseSchemaUpdate: false
+  resources:
+    static-locations: classpath:static/
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  #config-location: classpath:mybatis-config.xml
+
+security:
+  basic:
+    enabled: false
+
